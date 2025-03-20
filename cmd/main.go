@@ -114,9 +114,3 @@ func getPokeMap(command string) func() {
 		internal.GetPokeMapAPI(url)
 	}
 }
-
-// The reason the value in the closure isn't automatically updated even though you modify the global variables in the function is that closures capture the value of variables at the time they are created
-
-// This is a feature of closures in Go (and other languages too). A closure captures the current state of the value of any variables used within it, but it doesn't "re-fetch" the variable's current value each time the closure is called.
-
-// go run . | tee repl.log

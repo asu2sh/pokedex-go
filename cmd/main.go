@@ -7,7 +7,7 @@ import (
 	"os/exec"
 	"runtime"
 	"strings"
-	"github.com/asu2sh/pokedex-go/internal"
+	"github.com/asu2sh/pokedex-go/internal/poke"
 )
 
 type cliCommand struct {

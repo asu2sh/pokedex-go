@@ -18,6 +18,8 @@ type cliCommand struct {
 
 var cliCommand_map map[string]cliCommand
 
+var pokecache = internal.NewPokeCache()
+
 func main() {
 	cliCommand_map = map[string]cliCommand{
 		"exit": {
@@ -38,12 +40,12 @@ func main() {
 		"map": {
 			name:        "map",
 			description: "Get 20 map locations",
-			callback:    getPokeMap("map"),
+			callback:    func() { getPokeMap("map")() },
 		},
 		"mapb": {
 			name:        "mapb",
 			description: "Get 20 previous map locations",
-			callback:    getPokeMap("mapb"),
+			callback:    func() { getPokeMap("mapb")() },
 		},
 	}
 
@@ -111,6 +113,6 @@ func getPokeMap(command string) func() {
 		} else {
 			url = internal.PreviousPokeMapURL
 		}
-		internal.GetPokeMapAPI(url)
+		internal.GetPokeMapAPI(url, pokecache)
 	}
 }

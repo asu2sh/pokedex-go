@@ -4,9 +4,10 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"time"
 )
 
-var NextPokeMapURL = "https://pokeapi.co/api/v2/location-area/"
+var NextPokeMapURL = "https://pokeapi.co/api/v2/location-area/?offset=0&limit=20"
 var PreviousPokeMapURL = ""
 
 type PokeMapLocation struct {
@@ -19,9 +20,23 @@ type PokeMapResult struct {
 	Previous string            `json:"previous"`
 }
 
-func GetPokeMapAPI(url string) {
+func PrintMapLocations(map_results PokeMapResult) {
+	for _, map_location := range map_results.Results {
+		fmt.Println(map_location.Name)
+	}
+
+	NextPokeMapURL = map_results.Next
+	PreviousPokeMapURL = map_results.Previous
+}
+
+func GetPokeMapAPI(url string, pokecache *PokeCache) {
 	if url == "" {
 		fmt.Println("you're on the first page")
+		return
+	}
+	
+	if map_results, ok := pokecache.Get(url); ok {
+		PrintMapLocations(map_results)
 		return
 	}
 
@@ -41,10 +56,6 @@ func GetPokeMapAPI(url string) {
 		fmt.Println("Map Locations Decode Failure", err)
 	}
 
-	for _, map_location := range map_results.Results {
-		fmt.Println(map_location.Name)
-	}
-
-	NextPokeMapURL = map_results.Next
-	PreviousPokeMapURL = map_results.Previous
+	PrintMapLocations(map_results)
+	pokecache.Add(url, map_results, 5*time.Second)
 }

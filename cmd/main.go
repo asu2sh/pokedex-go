@@ -7,7 +7,9 @@ import (
 	"os/exec"
 	"runtime"
 	"strings"
-	"github.com/asu2sh/pokedex-go/internal/poke"
+	"time"
+
+	internal "github.com/asu2sh/pokedex-go/internal/poke"
 )
 
 type cliCommand struct {
@@ -18,7 +20,8 @@ type cliCommand struct {
 
 var cliCommand_map map[string]cliCommand
 
-var pokecache = internal.NewPokeCache()
+var CacheExpirationDuration = 10 * time.Second
+var pokecache = internal.NewPokeCache(CacheExpirationDuration)
 
 func main() {
 	cliCommand_map = map[string]cliCommand{
@@ -97,7 +100,7 @@ func commandExit() {
 }
 
 func helpPokedex() {
-	fmt.Println("Welcome to Pokedex!") 
+	fmt.Println("Welcome to Pokedex!")
 	fmt.Printf("Usage:\n\n")
 	for key, val := range cliCommand_map {
 		fmt.Printf("%v: %v\n", key, val.description)

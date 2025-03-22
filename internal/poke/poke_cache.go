@@ -5,15 +5,34 @@ import (
 	"time"
 )
 
-
-type PokeCache struct {
-	data map[string] PokeMapResult
-	mu sync.RWMutex
+type PokeCacheEntry struct {
+	val       PokeMapResult
+	createdAt time.Time
 }
 
-func NewPokeCache() *PokeCache {
-	return &PokeCache{
-		data: make(map[string]PokeMapResult),
+type PokeCache struct {
+	mu       sync.RWMutex
+	data     map[string]PokeCacheEntry
+	interval time.Duration
+}
+
+func NewPokeCache(interval time.Duration) *PokeCache {
+	pokecache := &PokeCache{
+		data:     make(map[string]PokeCacheEntry),
+		interval: interval,
+	}
+
+	go startCacheCleanup(pokecache)
+
+	return pokecache
+}
+
+func (pc *PokeCache) Add(key string, value PokeMapResult) {
+	pc.mu.Lock()
+	defer pc.mu.Unlock()
+	pc.data[key] = PokeCacheEntry{
+		val:       value,
+		createdAt: time.Now(),
 	}
 }
 
@@ -21,20 +40,20 @@ func (pc *PokeCache) Get(key string) (PokeMapResult, bool) {
 	pc.mu.RLock()
 	defer pc.mu.RUnlock()
 	result, ok := pc.data[key]
-	return result, ok
+	return result.val, ok
 }
 
-func (pc *PokeCache) Add(key string, value PokeMapResult, duration time.Duration) {
-	pc.mu.Lock()
-	defer pc.mu.Unlock()
-	defer pc.Delete(key, duration)
-	pc.data[key] = value
-}
+func startCacheCleanup(pc *PokeCache) {
+	ticker := time.NewTicker(pc.interval)
+	defer ticker.Stop()
 
-func (pc *PokeCache) Delete(key string, duration time.Duration) {
-	time.AfterFunc(duration, func() {
-        pc.mu.Lock()
-        defer pc.mu.Unlock()
-        delete(pc.data, key)
-    })
+	for range ticker.C {
+		pc.mu.Lock()
+		for key, entry := range pc.data {
+			if time.Since(entry.createdAt) > pc.interval {
+				delete(pc.data, key)
+			}
+		}
+		pc.mu.Unlock()
+	}
 }

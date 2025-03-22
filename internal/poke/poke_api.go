@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
-	"time"
 )
 
 var NextPokeMapURL = "https://pokeapi.co/api/v2/location-area/?offset=0&limit=20"
@@ -57,5 +56,5 @@ func GetPokeMapAPI(url string, pokecache *PokeCache) {
 	}
 
 	PrintMapLocations(map_results)
-	pokecache.Add(url, map_results, 5*time.Second)
+	pokecache.Add(url, map_results)
 }

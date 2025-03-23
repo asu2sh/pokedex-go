@@ -23,6 +23,8 @@ var cliCommand_map map[string]cliCommand
 var CacheExpirationDuration = 10 * time.Second
 var pokecache = internal.NewPokeCache(CacheExpirationDuration)
 
+var poke_map_name = ""
+
 func main() {
 	cliCommand_map = map[string]cliCommand{
 		"exit": {
@@ -43,12 +45,17 @@ func main() {
 		"map": {
 			name:        "map",
 			description: "Get 20 map locations",
-			callback:    func() { getPokeMap("map")() },
+			callback:    getPokeMap("map"),
 		},
 		"mapb": {
 			name:        "mapb",
 			description: "Get 20 previous map locations",
-			callback:    func() { getPokeMap("mapb")() },
+			callback:    getPokeMap("mapb"),
+		},
+		"explore": {
+			name:        "explore",
+			description: "Explore the Pokedex",
+			callback:    explorePokeMap,
 		},
 	}
 
@@ -61,11 +68,15 @@ func main() {
 			if len(text) == 0 {
 				continue
 			}
-			cmd, ok := cliCommand_map[text]
+			text_slice := cleanInput(text)
+			cmd, ok := cliCommand_map[text_slice[0]]
 			if ok {
+				if cmd.name == cliCommand_map["explore"].name {
+					poke_map_name = text_slice[1]
+				}
 				cmd.callback()
 			} else {
-				cleanInput(text)
+				fmt.Println("Unknown command. Type 'help' for available commands.")
 			}
 		}
 		if err := scanner.Err(); err != nil {
@@ -77,9 +88,6 @@ func main() {
 func cleanInput(text string) []string {
 	text = strings.ToLower(text)
 	text_slice := strings.Fields(text)
-	if len(text_slice) != 0 {
-		fmt.Println("Your command was: ", text_slice[0])
-	}
 	return text_slice
 }
 
@@ -112,10 +120,14 @@ func getPokeMap(command string) func() {
 	return func() {
 		var url string
 		if command == "map" {
-			url = internal.NextPokeMapURL
+			url = internal.PokeMapURL
 		} else {
 			url = internal.PreviousPokeMapURL
 		}
 		internal.GetPokeMapAPI(url, pokecache)
 	}
+}
+
+func explorePokeMap() {
+	internal.ExplorePokeMapAPI(poke_map_name)
 }

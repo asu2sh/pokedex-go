@@ -17,14 +17,14 @@ type PokeCache struct {
 }
 
 func NewPokeCache(interval time.Duration) *PokeCache {
-	pokecache := &PokeCache{
+	pokeCache := &PokeCache{
 		data:     make(map[string]PokeCacheEntry),
 		interval: interval,
 	}
 
-	go startCacheCleanup(pokecache)
+	go startCacheCleanup(pokeCache)
 
-	return pokecache
+	return pokeCache
 }
 
 func (pc *PokeCache) Add(key string, value []byte) {

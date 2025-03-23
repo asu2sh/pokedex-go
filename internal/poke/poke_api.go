@@ -88,7 +88,7 @@ func printPokemonsLocations(mapResults []byte) {
 	var pokeMapResults ExplorePokeMapResult
 	json.Unmarshal(mapResults, &pokeMapResults)
 
-	// Print the names of all Pokémon locations
+	// Print the names of all Pokémon for the map location
 	for _, pokemon := range pokeMapResults.PokemonEncounters {
 		fmt.Println(pokemon.Pokemon.Name)
 	}

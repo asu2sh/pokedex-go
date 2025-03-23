@@ -18,15 +18,15 @@ type cliCommand struct {
 	callback    func()
 }
 
-var cliCommand_map map[string]cliCommand
+var cliCommandMap map[string]cliCommand
 
-var CacheExpirationDuration = 10 * time.Second
-var pokecache = internal.NewPokeCache(CacheExpirationDuration)
+var cacheExpirationDuration = 10 * time.Second
+var pokeCache = internal.NewPokeCache(cacheExpirationDuration)
 
-var poke_map_name = ""
+var pokeMapName = ""
 
 func main() {
-	cliCommand_map = map[string]cliCommand{
+	cliCommandMap = map[string]cliCommand{
 		"exit": {
 			name:        "exit",
 			description: "Exit the Pokedex",
@@ -68,11 +68,11 @@ func main() {
 			if len(text) == 0 {
 				continue
 			}
-			text_slice := cleanInput(text)
-			cmd, ok := cliCommand_map[text_slice[0]]
+			textSlice := cleanInput(text)
+			cmd, ok := cliCommandMap[textSlice[0]]
 			if ok {
-				if cmd.name == cliCommand_map["explore"].name {
-					poke_map_name = text_slice[1]
+				if cmd.name == cliCommandMap["explore"].name {
+					pokeMapName = textSlice[1]
 				}
 				cmd.callback()
 			} else {
@@ -87,8 +87,8 @@ func main() {
 
 func cleanInput(text string) []string {
 	text = strings.ToLower(text)
-	text_slice := strings.Fields(text)
-	return text_slice
+	textSlice := strings.Fields(text)
+	return textSlice
 }
 
 func clearScreen() {
@@ -100,8 +100,8 @@ func clearScreen() {
 	}
 	cmd.Stdout = os.Stdout
 	cmd.Run()
-
 }
+
 func commandExit() {
 	fmt.Println("Closing the Pokedex... Goodbye!")
 	os.Exit(0)
@@ -110,7 +110,7 @@ func commandExit() {
 func helpPokedex() {
 	fmt.Println("Welcome to Pokedex!")
 	fmt.Printf("Usage:\n\n")
-	for key, val := range cliCommand_map {
+	for key, val := range cliCommandMap {
 		fmt.Printf("%v: %v\n", key, val.description)
 	}
 	fmt.Println("\nAll rights reserved! Created by asu2sh with 💗")
@@ -124,10 +124,10 @@ func getPokeMap(command string) func() {
 		} else {
 			url = internal.PreviousPokeMapURL
 		}
-		internal.GetPokeMap(url, pokecache)
+		internal.GetPokeMap(url, pokeCache)
 	}
 }
 
 func explorePokeMap() {
-	internal.ExplorePokeMap(poke_map_name, pokecache)
+	internal.ExplorePokeMap(pokeMapName, pokeCache)
 }

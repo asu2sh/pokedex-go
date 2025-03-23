@@ -7,8 +7,8 @@ import (
 	"net/http"
 )
 
-var PokeMapURL = "https://pokeapi.co/api/v2/location-area/"
-var NextPokeMapURL = PokeMapURL
+var pokeMapURL = "https://pokeapi.co/api/v2/location-area/"
+var NextPokeMapURL = pokeMapURL
 var PreviousPokeMapURL = ""
 
 type PokeMapLocation struct {
@@ -33,11 +33,13 @@ type ExplorePokeMapResult struct {
 	PokemonEncounters []PokemonEncounters `json:"pokemon_encounters"`
 }
 
-func PokeMapAPI[T any](key string, pokecache *PokeCache, poke_struct *T) []byte {
-	if map_results, ok := pokecache.Get(key); ok {
-		return map_results
+func pokeMapAPI(key string, pokeCache *PokeCache) []byte {
+	// Try to get the map results from cache first
+	if mapResults, ok := pokeCache.Get(key); ok {
+		return mapResults
 	}
 
+	// Fetch map results if not found in cache
 	res, err := http.Get(key)
 	if err != nil {
 		fmt.Println("error: %w", err)
@@ -48,51 +50,54 @@ func PokeMapAPI[T any](key string, pokecache *PokeCache, poke_struct *T) []byte 
 		fmt.Println("Map fetching FAILED!")
 	}
 
-	map_results, err := io.ReadAll(res.Body)
-
+	mapResults, err := io.ReadAll(res.Body)
 	if err != nil {
 		fmt.Println("Map Locations Decode Failure", err)
 	}
 
-	pokecache.Add(key, map_results)
-	return map_results
+	// Cache the results for future requests
+	pokeCache.Add(key, mapResults)
+	return mapResults
 }
 
-func PrintMapLocations(map_results []byte) {
-	var poke_map_results PokeMapResult
-	json.Unmarshal(map_results, &poke_map_results)
+func printMapLocations(mapResults []byte) {
+	var pokeMapResults PokeMapResult
+	json.Unmarshal(mapResults, &pokeMapResults)
 
-	for _, map_location := range poke_map_results.Results {
-		fmt.Println(map_location.Name)
+	// Print the names of all map locations
+	for _, mapLocation := range pokeMapResults.Results {
+		fmt.Println(mapLocation.Name)
 	}
 
-	NextPokeMapURL = poke_map_results.Next
-	PreviousPokeMapURL = poke_map_results.Previous
+	// Update the next and previous URLs for pagination
+	NextPokeMapURL = pokeMapResults.Next
+	PreviousPokeMapURL = pokeMapResults.Previous
 }
 
-func GetPokeMap(url string, pokecache *PokeCache) {
+func GetPokeMap(url string, pokeCache *PokeCache) {
 	if url == "" {
-		fmt.Println("you're on the first page")
+		fmt.Println("You're on the first page")
 		return
 	}
 
-	map_results := PokeMapAPI(url, pokecache, &PokeMapResult{})
-	PrintMapLocations(map_results)
+	mapResults := pokeMapAPI(url, pokeCache)
+	printMapLocations(mapResults)
 }
 
-func PrintPokemonsLocations(map_results []byte) {
-	var poke_map_results ExplorePokeMapResult
-	json.Unmarshal(map_results, &poke_map_results)
+func printPokemonsLocations(mapResults []byte) {
+	var pokeMapResults ExplorePokeMapResult
+	json.Unmarshal(mapResults, &pokeMapResults)
 
-	for _, pokemon := range poke_map_results.PokemonEncounters {
+	// Print the names of all Pokémon locations
+	for _, pokemon := range pokeMapResults.PokemonEncounters {
 		fmt.Println(pokemon.Pokemon.Name)
 	}
 }
 
-func ExplorePokeMap(map_name string, pokecache *PokeCache) {
-	fmt.Printf("Exploring %v...\n", map_name)
+func ExplorePokeMap(mapName string, pokeCache *PokeCache) {
+	fmt.Printf("Exploring %v...\n", mapName)
 
-	url := fmt.Sprintf("%v%v", PokeMapURL, map_name)
-	map_results := PokeMapAPI(url, pokecache, &ExplorePokeMapResult{})
-	PrintPokemonsLocations(map_results)
+	url := fmt.Sprintf("%v%v", pokeMapURL, mapName)
+	mapResults := pokeMapAPI(url, pokeCache)
+	printPokemonsLocations(mapResults)
 }

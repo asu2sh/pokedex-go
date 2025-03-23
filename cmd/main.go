@@ -129,5 +129,5 @@ func getPokeMap(command string) func() {
 }
 
 func explorePokeMap() {
-	internal.ExplorePokeMapAPI(poke_map_name)
+	internal.ExplorePokeMapAPI(poke_map_name, pokecache)
 }

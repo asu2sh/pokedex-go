@@ -76,8 +76,23 @@ type ExplorePokeMapResult struct {
 	PokemonEncounters []PokemonEncounters `json:"pokemon_encounters"`
 }
 
-func ExplorePokeMapAPI(map_name string) {
+func PrintPokemonsLocations(map_results []byte) {
+	var poke_map_results ExplorePokeMapResult
+	json.Unmarshal(map_results, &poke_map_results)
+
+	for _, pokemon := range poke_map_results.PokemonEncounters {
+		fmt.Println(pokemon.Pokemon.Name)
+	}
+}
+
+func ExplorePokeMapAPI(map_name string, pokecache *PokeCache) {
 	fmt.Printf("Exploring %v...\n", map_name)
+
+	if map_results, ok := pokecache.Get(map_name); ok {
+		fmt.Println("Cache Hit! +++++++++++++++++++++++++++++")
+		PrintPokemonsLocations(map_results)
+		return
+	}
 
 	url := fmt.Sprintf("%v%v", PokeMapURL, map_name)
 	res, err := http.Get(url)
@@ -90,14 +105,13 @@ func ExplorePokeMapAPI(map_name string) {
 		fmt.Println("Map fetching FAILED!")
 	}
 
-	var poke_map_results ExplorePokeMapResult
+	map_results, err := io.ReadAll(res.Body)
 
-	if err := json.NewDecoder(res.Body).Decode(&poke_map_results); err != nil {
+	if err != nil {
 		fmt.Println("Map Locations Decode Failure", err)
 	}
 
-	for _, pokemon := range poke_map_results.PokemonEncounters {
-		fmt.Println(pokemon.Pokemon.Name)
-	}
-
+	fmt.Println("Cache Miss! ---------------------------")
+	PrintPokemonsLocations(map_results)
+	pokecache.Add(map_name, map_results)
 }

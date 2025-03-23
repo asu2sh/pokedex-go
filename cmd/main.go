@@ -12,6 +12,12 @@ import (
 	internal "github.com/asu2sh/pokedex-go/internal/poke"
 )
 
+const CACHE_EXPIRATION_DURATION = 10 * time.Second
+
+var pokeCache = internal.NewPokeCache(CACHE_EXPIRATION_DURATION)
+
+var pokeMapName = ""
+
 type cliCommand struct {
 	name        string
 	description string
@@ -19,11 +25,6 @@ type cliCommand struct {
 }
 
 var cliCommandMap map[string]cliCommand
-
-var cacheExpirationDuration = 10 * time.Second
-var pokeCache = internal.NewPokeCache(cacheExpirationDuration)
-
-var pokeMapName = ""
 
 func main() {
 	cliCommandMap = map[string]cliCommand{

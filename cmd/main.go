@@ -124,10 +124,10 @@ func getPokeMap(command string) func() {
 		} else {
 			url = internal.PreviousPokeMapURL
 		}
-		internal.GetPokeMapAPI(url, pokecache)
+		internal.GetPokeMap(url, pokecache)
 	}
 }
 
 func explorePokeMap() {
-	internal.ExplorePokeMapAPI(poke_map_name, pokecache)
+	internal.ExplorePokeMap(poke_map_name, pokecache)
 }

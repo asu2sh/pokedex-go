@@ -89,7 +89,6 @@ func ExplorePokeMapAPI(map_name string, pokecache *PokeCache) {
 	fmt.Printf("Exploring %v...\n", map_name)
 
 	if map_results, ok := pokecache.Get(map_name); ok {
-		fmt.Println("Cache Hit! +++++++++++++++++++++++++++++")
 		PrintPokemonsLocations(map_results)
 		return
 	}
@@ -111,7 +110,6 @@ func ExplorePokeMapAPI(map_name string, pokecache *PokeCache) {
 		fmt.Println("Map Locations Decode Failure", err)
 	}
 
-	fmt.Println("Cache Miss! ---------------------------")
 	PrintPokemonsLocations(map_results)
 	pokecache.Add(map_name, map_results)
 }

@@ -6,7 +6,7 @@ import (
 )
 
 type PokeCacheEntry struct {
-	val       PokeMapResult
+	val       []byte
 	createdAt time.Time
 }
 
@@ -27,7 +27,7 @@ func NewPokeCache(interval time.Duration) *PokeCache {
 	return pokecache
 }
 
-func (pc *PokeCache) Add(key string, value PokeMapResult) {
+func (pc *PokeCache) Add(key string, value []byte) {
 	pc.mu.Lock()
 	defer pc.mu.Unlock()
 	pc.data[key] = PokeCacheEntry{
@@ -36,7 +36,7 @@ func (pc *PokeCache) Add(key string, value PokeMapResult) {
 	}
 }
 
-func (pc *PokeCache) Get(key string) (PokeMapResult, bool) {
+func (pc *PokeCache) Get(key string) ([]byte, bool) {
 	pc.mu.RLock()
 	defer pc.mu.RUnlock()
 	result, ok := pc.data[key]

@@ -3,6 +3,7 @@ package internal
 import (
 	"encoding/json"
 	"fmt"
+	"io"
 	"net/http"
 )
 
@@ -20,13 +21,16 @@ type PokeMapResult struct {
 	Previous string            `json:"previous"`
 }
 
-func PrintMapLocations(map_results PokeMapResult) {
-	for _, map_location := range map_results.Results {
+func PrintMapLocations(map_results []byte) {
+	var poke_map_results PokeMapResult
+	json.Unmarshal(map_results, &poke_map_results)
+
+	for _, map_location := range poke_map_results.Results {
 		fmt.Println(map_location.Name)
 	}
 
-	NextPokeMapURL = map_results.Next
-	PreviousPokeMapURL = map_results.Previous
+	NextPokeMapURL = poke_map_results.Next
+	PreviousPokeMapURL = poke_map_results.Previous
 }
 
 func GetPokeMapAPI(url string, pokecache *PokeCache) {
@@ -50,9 +54,9 @@ func GetPokeMapAPI(url string, pokecache *PokeCache) {
 		fmt.Println("Map fetching FAILED!")
 	}
 
-	var map_results PokeMapResult
+	map_results, err := io.ReadAll(res.Body)
 
-	if err := json.NewDecoder(res.Body).Decode(&map_results); err != nil {
+	if err != nil {
 		fmt.Println("Map Locations Decode Failure", err)
 	}
 

@@ -2,7 +2,6 @@ package internal
 
 import (
 	"fmt"
-	"reflect"
 	"testing"
 	"time"
 )
@@ -11,19 +10,15 @@ func TestAddGet(t *testing.T) {
 	const interval = 5 * time.Second
 	cases := []struct {
 		key string
-		val PokeMapResult
+		val []byte
 	}{
 		{
 			key: "https://example.com",
-			val: PokeMapResult{
-				Results: []PokeMapLocation{{Name: "example"}},
-			},
+			val: []byte("testdata"),
 		},
 		{
 			key: "https://example.com/path",
-			val: PokeMapResult{
-				Results: []PokeMapLocation{{Name: "example-path"}},
-			},
+			val: []byte("moretestdata"),
 		},
 	}
 
@@ -36,7 +31,7 @@ func TestAddGet(t *testing.T) {
 				t.Errorf("expected to find key")
 				return
 			}
-			if !reflect.DeepEqual(val, c.val) {
+			if string(val) != string(c.val) {
 				t.Errorf("expected to find value")
 				return
 			}
@@ -44,11 +39,11 @@ func TestAddGet(t *testing.T) {
 	}
 }
 
-func TestStartCacheCleanup(t *testing.T) {
+func TestReapLoop(t *testing.T) {
 	const baseTime = 5 * time.Millisecond
 	const waitTime = baseTime + 5*time.Millisecond
 	cache := NewPokeCache(baseTime)
-	cache.Add("https://example.com", PokeMapResult{Results: []PokeMapLocation{{Name: "example"}}})
+	cache.Add("https://example.com", []byte("testdata"))
 
 	_, ok := cache.Get("https://example.com")
 	if !ok {

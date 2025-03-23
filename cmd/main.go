@@ -120,7 +120,7 @@ func getPokeMap(command string) func() {
 	return func() {
 		var url string
 		if command == "map" {
-			url = internal.PokeMapURL
+			url = internal.NextPokeMapURL
 		} else {
 			url = internal.PreviousPokeMapURL
 		}

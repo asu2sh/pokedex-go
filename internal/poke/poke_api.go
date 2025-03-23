@@ -7,6 +7,7 @@ import (
 )
 
 var PokeMapURL = "https://pokeapi.co/api/v2/location-area/"
+var NextPokeMapURL = PokeMapURL
 var PreviousPokeMapURL = ""
 
 type PokeMapLocation struct {
@@ -24,7 +25,7 @@ func PrintMapLocations(map_results PokeMapResult) {
 		fmt.Println(map_location.Name)
 	}
 
-	PokeMapURL = map_results.Next
+	NextPokeMapURL = map_results.Next
 	PreviousPokeMapURL = map_results.Previous
 }
 

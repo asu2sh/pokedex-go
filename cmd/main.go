@@ -16,12 +16,10 @@ const CACHE_EXPIRATION_DURATION = 10 * time.Second
 
 var pokeCache = internal.NewPokeCache(CACHE_EXPIRATION_DURATION)
 
-var pokeMapName = ""
-
 type cliCommand struct {
 	name        string
 	description string
-	callback    func()
+	callback    func(...string)
 }
 
 var cliCommandMap map[string]cliCommand
@@ -46,12 +44,12 @@ func main() {
 		"map": {
 			name:        "map",
 			description: "Get 20 map locations",
-			callback:    getPokeMap("map"),
+			callback:    getNextPokeMap,
 		},
 		"mapb": {
 			name:        "mapb",
 			description: "Get 20 previous map locations",
-			callback:    getPokeMap("mapb"),
+			callback:    getPreviousPokeMap,
 		},
 		"explore": {
 			name:        "explore",
@@ -72,10 +70,7 @@ func main() {
 			textSlice := cleanInput(text)
 			cmd, ok := cliCommandMap[textSlice[0]]
 			if ok {
-				if cmd.name == cliCommandMap["explore"].name {
-					pokeMapName = textSlice[1]
-				}
-				cmd.callback()
+				cmd.callback(textSlice[1:]...)
 			} else {
 				fmt.Println("Unknown command. Type 'help' for available commands.")
 			}
@@ -92,7 +87,7 @@ func cleanInput(text string) []string {
 	return textSlice
 }
 
-func clearScreen() {
+func clearScreen(args ...string) {
 	var cmd *exec.Cmd
 	if runtime.GOOS == "windows" {
 		cmd = exec.Command("cmd", "/c", "cls")
@@ -103,12 +98,12 @@ func clearScreen() {
 	cmd.Run()
 }
 
-func commandExit() {
+func commandExit(args ...string) {
 	fmt.Println("Closing the Pokedex... Goodbye!")
 	os.Exit(0)
 }
 
-func helpPokedex() {
+func helpPokedex(args ...string) {
 	fmt.Println("Welcome to Pokedex!")
 	fmt.Printf("Usage:\n\n")
 	for key, val := range cliCommandMap {
@@ -117,18 +112,34 @@ func helpPokedex() {
 	fmt.Println("\nAll rights reserved! Created by asu2sh with 💗")
 }
 
-func getPokeMap(command string) func() {
-	return func() {
-		var url string
-		if command == "map" {
-			url = internal.NextPokeMapURL
-		} else {
-			url = internal.PreviousPokeMapURL
-		}
-		internal.GetPokeMap(url, pokeCache)
+func validateArgs(required bool, count int, args ...string) bool {
+	if len(args) > count {
+		fmt.Println("Ignoring extra arguments!")
+		return true
 	}
+	if required && len(args) < count {
+		fmt.Println("Please provide the required arguments!")
+		return false
+	}
+	return true
 }
 
-func explorePokeMap() {
+func getNextPokeMap(args ...string) {
+	validateArgs(false, 0, args...)
+	url := internal.NextPokeMapURL
+	internal.GetPokeMap(url, pokeCache)
+}
+
+func getPreviousPokeMap(args ...string) {
+	validateArgs(false, 0, args...)
+	url := internal.PreviousPokeMapURL
+	internal.GetPokeMap(url, pokeCache)
+}
+
+func explorePokeMap(args ...string) {
+	if !validateArgs(true, 1, args...){
+		return
+	}
+	pokeMapName := args[0]
 	internal.ExplorePokeMap(pokeMapName, pokeCache)
 }

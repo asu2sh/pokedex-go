@@ -56,6 +56,16 @@ func main() {
 			description: "Explore the Pokedex",
 			callback:    explorePokeMap,
 		},
+		"catch": {
+			name:        "catch",
+			description: "Catch a Pokemon",
+			callback:    catchPokemon,
+		},
+		"pokedex": {
+			name:        "pokedex",
+			description: "User's Pokedex",
+			callback:    myPokedex,
+		},
 	}
 
 	scanner := bufio.NewScanner(os.Stdin)
@@ -137,9 +147,24 @@ func getPreviousPokeMap(args ...string) {
 }
 
 func explorePokeMap(args ...string) {
-	if !validateArgs(true, 1, args...){
+	if !validateArgs(true, 1, args...) {
 		return
 	}
 	pokeMapName := args[0]
 	internal.ExplorePokeMap(pokeMapName, pokeCache)
+}
+
+func catchPokemon(args ...string) {
+	if !validateArgs(true, 1, args...) {
+		return
+	}
+	pokemonName := args[0]
+	internal.CatchPokemon(pokemonName)
+}
+
+func myPokedex(args ...string) {
+	if !validateArgs(false, 0, args...) {
+		return
+	}
+	internal.MyPokedex()
 }

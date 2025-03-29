@@ -153,7 +153,7 @@ func tryCatchPokemon(pokemonName string, pokemon Pokemon) {
 
 	if randomChance >= pokemon.BaseExperience {
 		fmt.Printf("%v was caught!\n", pokemonName)
-		fmt.Println("You may now inspect it with the inspect command.")
+		fmt.Println("You may now inspect it with the inspect command.\n")
 		userPokedex.Pokemons[pokemonName] = pokemon
 	} else {
 		fmt.Printf("%v escaped!\n", pokemonName)

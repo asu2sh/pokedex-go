@@ -14,19 +14,32 @@ const pokeMapURL = "https://pokeapi.co/api/v2/location-area/"
 var NextPokeMapURL = pokeMapURL
 var PreviousPokeMapURL = ""
 
-type PokeMapLocation struct {
+type FieldName struct {
 	Name string `json:"name"`
 }
 
 type PokeMapResult struct {
-	Results  []PokeMapLocation `json:"results"`
-	Next     string            `json:"next"`
-	Previous string            `json:"previous"`
+	Results  []FieldName `json:"results"`
+	Next     string      `json:"next"`
+	Previous string      `json:"previous"`
+}
+
+type Stats struct {
+	BaseStat int       `json:"base_stat"`
+	StatName FieldName `json:"stat"`
+}
+
+type Types struct {
+	TypeName FieldName `json:"type"`
 }
 
 type Pokemon struct {
-	Name           string `json:"name"`
-	BaseExperience int    `json:"base_experience"`
+	Name           string  `json:"name"`
+	BaseExperience int     `json:"base_experience"`
+	Height         int     `json:"height"`
+	Weight         int     `json:"weight"`
+	Stats          []Stats `json:"stats"`
+	Types          []Types `json:"types"`
 }
 
 type PokemonEncounters struct {
@@ -134,13 +147,13 @@ func pokemonDetailsAPI(pokemonName string) ([]byte, error) {
 	return pokemonResults, nil
 }
 
-func tryCatchPokemon(pokemonName string, baseExperience int) {
+func tryCatchPokemon(pokemonName string, pokemon Pokemon) {
 	randomChance := rand.Intn(500)
-	fmt.Println(randomChance, baseExperience)
+	fmt.Println(randomChance, pokemon.BaseExperience)
 
-	if randomChance >= baseExperience {
+	if randomChance >= pokemon.BaseExperience {
 		fmt.Printf("%v was caught!\n", pokemonName)
-		userPokedex.Pokemons[pokemonName] = Pokemon{Name: pokemonName}
+		userPokedex.Pokemons[pokemonName] = pokemon
 	} else {
 		fmt.Printf("%v escaped!\n", pokemonName)
 	}
@@ -168,7 +181,7 @@ func CatchPokemon(pokemonName string) {
 		return
 	}
 
-	tryCatchPokemon(pokemonName, pokemon.BaseExperience)
+	tryCatchPokemon(pokemonName, pokemon)
 }
 
 func MyPokedex() {
@@ -176,4 +189,27 @@ func MyPokedex() {
 	for _, pokemon := range userPokedex.Pokemons {
 		fmt.Printf(" - %v\n", pokemon.Name)
 	}
+}
+
+func printPokemonDetails(pokemon Pokemon) {
+	fmt.Printf("Name: %v\n", pokemon.Name)
+	fmt.Printf("Height: %v\n", pokemon.Height)
+	fmt.Printf("Weight: %v\n", pokemon.Weight)
+	fmt.Println("Stats:")
+	for _, data := range pokemon.Stats {
+		fmt.Printf(" - %v: %v\n", data.StatName.Name, data.BaseStat)
+	}
+	fmt.Println("Types:")
+	for _, data := range pokemon.Types {
+		fmt.Printf(" - %v\n", data.TypeName.Name)
+	}
+}
+
+func InspectPokemon(pokemonName string) {
+	pokemon_details, exists := userPokedex.Pokemons[pokemonName]
+	if !exists {
+		fmt.Printf("you have not caught %v\n", pokemonName)
+		return
+	}
+	printPokemonDetails(pokemon_details)
 }

@@ -66,6 +66,11 @@ func main() {
 			description: "User's Pokedex",
 			callback:    myPokedex,
 		},
+		"inspect": {
+			name:        "inspect",
+			description: "Inspect a Pokemon",
+			callback:    inspectPokemon,
+		},
 	}
 
 	scanner := bufio.NewScanner(os.Stdin)
@@ -167,4 +172,12 @@ func myPokedex(args ...string) {
 		return
 	}
 	internal.MyPokedex()
+}
+
+func inspectPokemon(args ...string) {
+	if !validateArgs(true, 1, args...) {
+		return
+	}
+	pokemonName := args[0]
+	internal.InspectPokemon(pokemonName)
 }

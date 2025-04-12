@@ -115,12 +115,6 @@ go test ./internal/poke
 
 ---
 
-## License
-
-This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
-
----
-
 ## Acknowledgments
 
 - [PokéAPI](https://pokeapi.co/) for providing the Pokémon data.

@@ -123,5 +123,5 @@ This project is licensed under the MIT License. See the [LICENSE](LICENSE) file 
 
 ## Acknowledgments
 
+- [Boot.dev](https://boot.dev/) for inspiration for this project.
 - [PokéAPI](https://pokeapi.co/) for providing the Pokémon data.
-- Built with 💗 by Ashutosh Kumar.
